@@ -32,5 +32,13 @@ public class User {
     @Column(name = "role")
     private Role role;
 
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "status")
+    private Status status;
+
+    @OneToMany
+    @JoinColumn(name = "patient_id")
+    private Set<Diagnosis> diagnosis;
+
 
 }
