@@ -1,5 +1,6 @@
 package by.alekseichik.demo.model;
 
+import by.alekseichik.demo.dto.RegistrationDequestDto;
 import lombok.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -40,5 +41,13 @@ public class User {
     @JoinColumn(name = "patient_id")
     private Set<Diagnosis> diagnosis;
 
+    public User(RegistrationDequestDto dto){
+        email = dto.getEmail();
+        password = new BCryptPasswordEncoder().encode(dto.getPassword());
+        firstName = dto.getFirstName();
+        lastName = dto.getLastName();
+        role = Role.PATIENT;
+        status = Status.ACTIVE;
+    }
 
 }

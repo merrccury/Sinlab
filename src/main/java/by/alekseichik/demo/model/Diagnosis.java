@@ -1,5 +1,6 @@
 package by.alekseichik.demo.model;
 
+import by.alekseichik.demo.dto.DiagnosesRequestDto;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -30,5 +31,14 @@ public class Diagnosis {
     @OneToMany
     @JoinColumn(name = "diagnosis_id")
     private Set<Order> orders;
+
+    public  Diagnosis(){}
+
+    public Diagnosis (DiagnosesRequestDto dto){
+        patientId = dto.getPatient();
+        diagnosis = dto.getDiagnosis();
+        dateOfVisit = new Date(System.currentTimeMillis());
+        doctorId = dto.getDoctor();
+    }
 
 }
