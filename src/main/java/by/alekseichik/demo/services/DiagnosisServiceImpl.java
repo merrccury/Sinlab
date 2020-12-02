@@ -1,46 +1,35 @@
 package by.alekseichik.demo.services;
 
-import by.alekseichik.demo.dto.DiagnosesDto;
-import by.alekseichik.demo.dto.DiagnosesRequestDto;
-import by.alekseichik.demo.dto.PatientDto;
 import by.alekseichik.demo.model.Diagnosis;
+import by.alekseichik.demo.model.User;
 import by.alekseichik.demo.repository.DiagnosisRepository;
 import by.alekseichik.demo.repository.UserRepository;
 
-import java.util.List;
+import java.sql.Date;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 public class DiagnosisServiceImpl implements DiagnosisService {
 
-    private final DiagnosisRepository diagnosisRepository;
-    private final UserRepository userRepository;
+    public final UserRepository userRepository;
+    public final DiagnosisRepository diagnosisRepository;
 
-    public DiagnosisServiceImpl(DiagnosisRepository diagnosisRepository, UserRepository userRepository) {
-        this.diagnosisRepository = diagnosisRepository;
+    public DiagnosisServiceImpl(UserRepository userRepository, DiagnosisRepository diagnosisRepository) {
         this.userRepository = userRepository;
+        this.diagnosisRepository = diagnosisRepository;
     }
 
 
     @Override
-    public List<DiagnosesDto> getUsersDiagnosis(Long userId) {
-        if (userRepository.findById(userId).isEmpty())
-            return null;
-        PatientDto dto = new PatientDto(userRepository.findById(userId).get());
-        return  dto.getDiagnosis();
-    }
+    public void addDiagnosis(String d, String patientEmail, String doctorEmail) {
+        PatientServiceImpl patientService = new PatientServiceImpl(userRepository);
+        User patient =  patientService.getUser(patientEmail);
+        User doctor = patientService.getUser(doctorEmail);
+        Diagnosis diagnosis = new Diagnosis();
+        diagnosis.setPatientId(patient.getId());
+        diagnosis.setDoctorId(doctor.getId());
+        diagnosis.setDiagnosis(d);
 
-    @Override
-    public DiagnosesDto getDiagnoses(Long diagnosesId) {
-        if (diagnosisRepository.findById(diagnosesId).isEmpty())
-            return null;
-        DiagnosesDto dto = new DiagnosesDto(diagnosisRepository.findById(diagnosesId).get());
-        return  dto;
-    }
-
-
-    @Override
-    public void createDiagnoses(DiagnosesRequestDto dto) {
-
-        diagnosisRepository.save(new Diagnosis(dto));
-
+        diagnosisRepository.save(diagnosis);
     }
 }

@@ -1,11 +1,11 @@
 package by.alekseichik.demo.services;
 
-import by.alekseichik.demo.dto.PatientDto;
-import by.alekseichik.demo.dto.RegistrationDequestDto;
+import by.alekseichik.demo.exception.ApiAuthException;
+import by.alekseichik.demo.model.Status;
 import by.alekseichik.demo.model.User;
 import by.alekseichik.demo.repository.UserRepository;
 
-public class PatientServiceImpl implements PatientService {
+public class PatientServiceImpl implements PatientService{
 
     private final UserRepository userRepository;
 
@@ -13,21 +13,30 @@ public class PatientServiceImpl implements PatientService {
         this.userRepository = userRepository;
     }
 
-    @Override
-    public PatientDto getHistory(Long id) {
-        if (userRepository.findById(id).isEmpty())
-            return null;
 
-        return new PatientDto(userRepository.findById(id).get());
+    @Override
+    public User getUser(String email) {
+        if(!userRepository.findByEmail(email).isEmpty()){
+            return userRepository.findByEmail(email).get();
+        }
+        throw new ApiAuthException("User Not found");
     }
 
     @Override
-    public PatientDto addPatient(RegistrationDequestDto dto) {
-        User user  = new User(dto);
-        if (userRepository.findById(user.getId()).isEmpty()){
+    public void banStatus(String email) {
+        if(!userRepository.findByEmail(email).isEmpty()) {
+            User user = userRepository.findByEmail(email).get();
+            user.setStatus(Status.BANNED);
             userRepository.save(user);
-            return  new PatientDto(user);
         }
-        return null;
+    }
+
+    @Override
+    public void activeStatus(String email) {
+        if(!userRepository.findByEmail(email).isEmpty()) {
+            User user = userRepository.findByEmail(email).get();
+            user.setStatus(Status.ACTIVE);
+            userRepository.save(user);
+        }
     }
 }

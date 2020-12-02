@@ -1,9 +1,9 @@
 package by.alekseichik.demo.services;
 
-import by.alekseichik.demo.dto.PatientDto;
-import by.alekseichik.demo.dto.RegistrationDequestDto;
+import by.alekseichik.demo.model.User;
 
 public interface PatientService {
-    PatientDto getHistory(Long id);
-    PatientDto addPatient(RegistrationDequestDto dto);
+    public User getUser(String email);
+    public void banStatus(String email);
+    public void activeStatus(String email);
 }
