@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 public class MailServiceImpl implements MailSender {
 
 
-    @Autowired
-    private JavaMailSender javaMailSender;
+    //@Autowired
+    //private JavaMailSender javaMailSender;
 
     @Value("${spring.mail.username}")
     private String username;
@@ -22,7 +22,7 @@ public class MailServiceImpl implements MailSender {
         mailMessage.setTo(emailTo);
         mailMessage.setSubject(subject);
         mailMessage.setText(message);
-        javaMailSender.send(mailMessage);
+      //  javaMailSender.send(mailMessage);
     }
 
 }
