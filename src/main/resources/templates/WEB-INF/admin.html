@@ -1,0 +1,129 @@
+<div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <button class="btn btn-outline-success my-2 my-sm-0" onclick="logout();" type="button">Log Out</button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+            </ul>
+            <form class="form-inline my-2 my-lg-0" disabled id="searchPatient">
+                <a class="nav-link">Find Patient in Search Field <span class="sr-only">(current)</span></a>
+                <input class="form-control mr-sm-2" id="searchStr" type="search" placeholder="Search"
+                       aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="list-group">
+        <a href="#" class="list-group-item list-group-item-action flex-column align-items-start active">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Patient</h5>
+            </div>
+            <p class="mb-1" id="patientName"></p>
+        </a>
+        <div id="diagnoses">
+
+        </div>
+        <button type="button" onclick="changeStatus();" id="bunButton" class="btn btn-primary">Ban User</button>
+    </div>
+    <script>
+        let SCookie = document.cookie.split(';').reduce((cookieObject, cookieString) => {
+            let splitCookie = cookieString.split('=')
+            try {
+                cookieObject[splitCookie[0].trim()] = decodeURIComponent(splitCookie[1])
+            } catch (error) {
+                cookieObject[splitCookie[0].trim()] = splitCookie[1]
+            }
+            return cookieObject
+        }, [])
+
+        console.log(SCookie.token);
+
+        let currentUser = -1;
+        let active;
+
+        $("#searchPatient").submit(function (event) {
+            let email = document.getElementById("searchStr").value;
+            load(email);
+            event.preventDefault();
+        });
+
+
+
+        function load(query) {
+            currentUser = -1;
+            $("#diagnoses").empty();
+            $("#diagnosisSelect").empty();
+            fetch("http://localhost:8080/api/v1/patients/" + query, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': SCookie.token
+                }
+            }).then((response) => {
+                return response.json()
+            }).then((data) => {
+                currentUser = data.email;
+                if(data.status === "ACTIVE"){
+                    active = true;
+                    $("#bunButton").html("Ban User")
+                }
+                else
+                {
+                    active = false;
+                    $("#bunButton").html("Active User")
+                }
+                $("#patientName").html(data.firstName + " " + data.lastName);
+                for (let i = 0; i < data.diagnosis.length; i++) {
+                    let block = "<a href=\"#\" class=\"list-group-item list-group-item-action flex-column align-items-start\">\n" +
+                        "                <div class=\"d-flex w-100 justify-content-between\">\n" +
+                        "                    <h5 class=\"mb-1\">";
+                    block += data.diagnosis[i].diagnoses;
+                    block += "</h5>\n" +
+                        "                    <small class=\"text-muted\">";
+                    block += data.diagnosis[i].date;
+                    block += "</small>\n" +
+                        "                </div>\n";
+                    for (let y = 0; y < data.diagnosis[i].orders.length; y++) {
+                        block += "<p class=\"mb-1\">";
+                        block += data.diagnosis[i].orders[y].order;
+                        block += "</p>\n";
+
+                    }
+                    block += "</a>";
+                    $("#diagnoses").append(block);
+                    $("#diagnosisSelect").append(`<option value="${data.diagnosis[i].id}">${data.diagnosis[i].diagnoses}</option>\n`)
+                }
+
+
+            }).catch((err) => {
+                console.log("error");
+                console.log(err);
+            })
+        }
+        function changeStatus(){
+            if(active){
+                fetch("http://localhost:8080/api/v1/patients/ban/" + currentUser, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': SCookie.token
+                    }
+                }).then(()=>{
+                    load(currentUser);
+                    active = false;
+                });
+            }
+            else{
+                fetch("http://localhost:8080/api/v1/patients/active/" + currentUser, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': SCookie.token
+                    }
+                }).then(()=>{
+                    load(currentUser);
+                    active = true;
+                });
+            }
+        }
+    </script>
+</div>

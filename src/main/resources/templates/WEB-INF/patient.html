@@ -1,0 +1,68 @@
+<div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <button class="btn btn-outline-success my-2 my-sm-0" onclick="logout();" type="button">Log Out</button>
+    </nav>
+    <h1 id="firstName"></h1>
+    <h1 id="lastName"></h1>
+
+    <div class="list-group">
+        <a href="#" class="list-group-item list-group-item-action flex-column align-items-start active">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Diagnoses</h5>
+            </div>
+            <p class="mb-1">Doctor's appointments.</p>
+        </a>
+        <div id="diagnoses">
+        </div>
+    </div>
+    <script>
+        let SCookie = document.cookie.split(';').reduce((cookieObject, cookieString) => {
+            let splitCookie = cookieString.split('=')
+            try {
+                cookieObject[splitCookie[0].trim()] = decodeURIComponent(splitCookie[1])
+            } catch (error) {
+                cookieObject[splitCookie[0].trim()] = splitCookie[1]
+            }
+            return cookieObject
+        }, [])
+
+        fetch("http://localhost:8080/api/v1/patients/" + SCookie.email, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': SCookie.token
+            }
+        }).then((response) => {
+            return response.json()
+        }).then((data) => {
+            $("#firstName").html(data.firstName);
+            $("#lastName").html(data.lastName);
+            for (let i =0; i < data.diagnosis.length; i++){
+                let block = "<a href=\"#\" class=\"list-group-item list-group-item-action flex-column align-items-start\">\n" +
+                    "                <div class=\"d-flex w-100 justify-content-between\">\n" +
+                    "                    <h5 class=\"mb-1\">";
+                block += data.diagnosis[i].diagnoses;
+                block += "</h5>\n" +
+                    "                    <small class=\"text-muted\">";
+                block += data.diagnosis[i].date;
+                block += "</small>\n" +
+                    "                </div>\n";
+                for(let y =0; y< data.diagnosis[i].orders.length; y++){
+                    block += "<p class=\"mb-1\">";
+                    block += data.diagnosis[i].orders[y].order;
+                    block+= "</p>\n";
+
+                }
+                block+= "</a>";
+                $("#diagnoses").append(block);
+
+            }
+
+
+        }).catch((err) => {
+            console.log("error");
+            console.log(err);
+        })
+
+    </script>
+</div>
